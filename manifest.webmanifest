@@ -1,0 +1,31 @@
+{
+  "name": "عائلتي الصحية",
+  "short_name": "عائلتي الصحية",
+  "description": "تنظيم وجبات العائلة والوزن والسعرات والماء بواجهة مناسبة للجوال وiPhone",
+  "lang": "ar",
+  "dir": "rtl",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "display_override": [
+    "standalone",
+    "minimal-ui"
+  ],
+  "orientation": "portrait",
+  "background_color": "#fff7fa",
+  "theme_color": "#f05a8a",
+  "icons": [
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ]
+}
