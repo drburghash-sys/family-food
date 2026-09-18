@@ -32,7 +32,7 @@ button{cursor:pointer}
 .todaybtn{margin-top:7px;border:0;background:transparent;color:var(--accent);font-weight:800;font-size:12px}
 .grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin:12px 0}
 .stat{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:13px 8px;text-align:center;box-shadow:var(--shadow);min-width:0}
-.stat span{display:block;font-size:12px;color:var(--muted)}.stat b{display:block;font-size:22px;margin-top:6px;white-space:nowrap}.stat small{display:block;margin-top:5px;color:var(--muted);font-size:11px}
+.stat span{display:block;font-size:12px;color:var(--muted)}.stat b{display:block;font-size:22px;margin-top:6px;white-space:nowrap}.stat small{display:block;margin-top:5px;color:var(--muted);font-size:11px}.stat .needline{font-weight:800;color:#42506d}.stat .diffline{font-weight:900}.stat .diffline.good{color:var(--good)}.stat .diffline.over{color:var(--danger)}
 .progress{height:8px;background:#edf0f4;border-radius:99px;overflow:hidden;margin-top:9px}.progress i{display:block;height:100%;border-radius:99px;background:var(--accent)}
 .progress.water i{background:var(--water)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:14px;margin:10px 0}
@@ -89,11 +89,15 @@ button{cursor:pointer}
 
     <div class="grid3">
       <div class="stat">
-        <span>السعرات</span><b id="calTotal">٠</b><small id="calRemain">حدّد الهدف</small>
+        <span>السعرات المكتسبة</span><b id="calTotal">٠</b>
+        <small id="calNeedText" class="needline">الاحتياج: —</small>
+        <small id="calDiffText" class="diffline">الفرق: —</small>
         <div class="progress"><i id="calBar" style="width:0%"></i></div>
       </div>
       <div class="stat">
-        <span>الماء</span><b id="waterTotal">٠</b><small id="waterRemain">مل</small>
+        <span>الماء المكتسب</span><b id="waterTotal">٠</b>
+        <small id="waterNeedText" class="needline">الاحتياج: —</small>
+        <small id="waterDiffText" class="diffline">الفرق: —</small>
         <div class="progress water"><i id="waterBar" style="width:0%"></i></div>
       </div>
       <div class="stat">
@@ -131,11 +135,31 @@ button{cursor:pointer}
   <section id="settings" class="view">
     <div class="topbar"><div class="brand"><h1>الإعدادات</h1><p>تُضبط مرة واحدة لكل جوال</p></div></div>
     <div class="card">
-      <h2>الأهداف اليومية</h2>
-      <div class="field"><label>هدف السعرات اليومي</label><input id="targetCalories" type="number" inputmode="numeric" min="0" max="6000" placeholder="مثال: 1800"></div>
-      <div class="field"><label>هدف الماء اليومي (مل)</label><input id="targetWater" type="number" inputmode="numeric" min="0" max="10000" step="50" placeholder="مثال: 2000"></div>
-      <button class="btn primary" style="width:100%" onclick="saveTargets()">حفظ الأهداف</button>
-      <p class="hint">التطبيق لا يحسب احتياجك تلقائيًا؛ أدخل الهدف الذي تستخدمه أنت أو الذي حدده لك مختص.</p>
+      <h2>حساب الاحتياج اليومي</h2>
+      <div class="field"><label>الجنس</label><select id="profileSex"><option value="male">ذكر</option><option value="female">أنثى</option></select></div>
+      <div class="actions">
+        <div class="field"><label>العمر</label><input id="profileAge" type="number" inputmode="numeric" min="3" max="100" placeholder="مثال: 45"></div>
+        <div class="field"><label>الطول (سم)</label><input id="profileHeight" type="number" inputmode="numeric" min="100" max="230" placeholder="مثال: 170"></div>
+      </div>
+      <div class="field"><label>الوزن الحالي (كجم)</label><input id="profileWeight" type="number" inputmode="decimal" min="20" max="350" step="0.1" placeholder="يستخدم آخر وزن مسجل تلقائيًا"></div>
+      <div class="field"><label>النشاط اليومي</label><select id="profileActivity">
+        <option value="1.2">قليل جدًا</option>
+        <option value="1.375">خفيف</option>
+        <option value="1.55">متوسط</option>
+        <option value="1.725">عالٍ</option>
+      </select></div>
+      <div class="field"><label>خفض السعرات عن الاحتياج</label><select id="profileDeficit">
+        <option value="0">بدون خفض — محافظة</option>
+        <option value="10">خفض ١٠٪</option>
+        <option value="15">خفض ١٥٪</option>
+        <option value="20">خفض ٢٠٪</option>
+      </select></div>
+      <button class="btn primary" style="width:100%" onclick="calculateAndSaveNeeds()">احسب واحفظ الاحتياج</button>
+      <div class="grid3" style="grid-template-columns:1fr 1fr;margin-bottom:0">
+        <div class="stat"><span>احتياج السعرات</span><b id="settingsCalNeed">—</b><small>سعرة/يوم</small></div>
+        <div class="stat"><span>احتياج الماء</span><b id="settingsWaterNeed">—</b><small>مل/يوم</small></div>
+      </div>
+      <p class="hint">للبالغين يستخدم تقدير Mifflin–St Jeor مع مستوى النشاط. لمن هم دون 18 سنة يعرض تقديرًا تقريبيًا للمحافظة دون تطبيق خفض السعرات. الماء يُقدّر من الوزن ويُحفظ كاحتياج يومي.</p>
     </div>
 
     <div class="card">
@@ -219,8 +243,19 @@ let selectedDate=new Date();
 let deferredPrompt=null;
 let state=loadState();
 
-function defaultState(){return {version:6,settings:{calorieTarget:0,waterTarget:0},days:{}}}
-function loadState(){try{const x=JSON.parse(localStorage.getItem(KEY));return x&&x.days?x:defaultState()}catch(e){return defaultState()}}
+function defaultState(){return {version:7,settings:{calorieNeed:0,waterNeed:0,profile:{sex:'male',age:'',height:'',activity:'1.375',deficit:0}},days:{}}}
+function loadState(){
+  try{
+    const x=JSON.parse(localStorage.getItem(KEY));
+    if(!x||!x.days)return defaultState();
+    x.settings=x.settings||{};
+    if(x.settings.calorieNeed===undefined)x.settings.calorieNeed=Number(x.settings.calorieTarget)||0;
+    if(x.settings.waterNeed===undefined)x.settings.waterNeed=Number(x.settings.waterTarget)||0;
+    x.settings.profile=x.settings.profile||{sex:'male',age:'',height:'',activity:'1.375',deficit:0};
+    x.version=7;
+    return x;
+  }catch(e){return defaultState()}
+}
 function saveState(){localStorage.setItem(KEY,JSON.stringify(state))}
 function pad(n){return String(n).padStart(2,'0')}
 function dateKey(d){return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate())}
@@ -236,22 +271,27 @@ function toast(msg){const e=document.getElementById('toast');e.textContent=msg;e
 function render(){
   const key=dateKey(selectedDate),d=dayData(key);
   const total=d.calories.reduce((s,x)=>s+(Number(x.value)||0),0);
-  const ct=Number(state.settings.calorieTarget)||0,wt=Number(state.settings.waterTarget)||0;
+  const ct=Number(state.settings.calorieNeed)||0,wt=Number(state.settings.waterNeed)||0;
   document.getElementById('dateTitle').textContent=key===todayKey()?'اليوم':fmtDate(selectedDate);
   document.getElementById('dateSub').textContent=key===todayKey()?fmtDate(selectedDate):key;
   document.getElementById('calTotal').textContent=ar(total);
-  document.getElementById('calRemain').textContent=ct?(total<=ct?'متبقي '+ar(ct-total):'تجاوز '+ar(total-ct)):'حدّد الهدف';
+  const calDiff=ct-total,calDiffEl=document.getElementById('calDiffText');
+  document.getElementById('calNeedText').textContent=ct?'الاحتياج: '+ar(ct):'الاحتياج: غير محسوب';
+  calDiffEl.textContent=ct?(calDiff>=0?'الفرق: متبقي '+ar(calDiff):'الفرق: زائد '+ar(Math.abs(calDiff))):'الفرق: —';
+  calDiffEl.className='diffline '+(ct?(calDiff>=0?'good':'over'):'');
   document.getElementById('calBar').style.width=(ct?clamp(total/ct*100,0,100):0)+'%';
   document.getElementById('waterTotal').textContent=ar(d.water);
-  document.getElementById('waterRemain').textContent=wt?(Number(d.water)<=wt?'متبقي '+ar(wt-Number(d.water))+' مل':'تجاوز '+ar(Number(d.water)-wt)+' مل'):'مل';
+  const waterDiff=wt-Number(d.water||0),waterDiffEl=document.getElementById('waterDiffText');
+  document.getElementById('waterNeedText').textContent=wt?'الاحتياج: '+ar(wt)+' مل':'الاحتياج: غير محسوب';
+  waterDiffEl.textContent=wt?(waterDiff>=0?'الفرق: متبقي '+ar(waterDiff)+' مل':'الفرق: زائد '+ar(Math.abs(waterDiff))+' مل'):'الفرق: —';
+  waterDiffEl.className='diffline '+(wt?(waterDiff>=0?'good':'over'):'');
   document.getElementById('waterBar').style.width=(wt?clamp(Number(d.water)/wt*100,0,100):0)+'%';
   const latestWeight=getLatestWeight(key);
   document.getElementById('weightNow').textContent=latestWeight===null?'—':ar(latestWeight,1);
   document.getElementById('entryCount').textContent=ar(d.calories.length)+' إضافة';
   renderEntries(d);
   renderHistory();
-  document.getElementById('targetCalories').value=state.settings.calorieTarget||'';
-  document.getElementById('targetWater').value=state.settings.waterTarget||'';
+  syncProfileUI();
 }
 function renderEntries(d){
   const box=document.getElementById('calEntries');
@@ -289,12 +329,58 @@ function openWeightSheet(){const d=dayData();document.getElementById('weightInpu
 function saveWeight(){
   const v=Number(document.getElementById('weightInput').value);
   if(!v||v<20||v>350){alert('أدخل وزنًا صحيحًا بين 20 و350 كجم');return}
-  dayData().weight=Math.round(v*10)/10;saveState();closeSheet('weightSheet');render();toast('تم حفظ الوزن');
+  dayData().weight=Math.round(v*10)/10;
+  const p=state.settings.profile||{};
+  if(Number(p.age)>0&&Number(p.height)>0){
+    p.weight=Math.round(v*10)/10;
+    state.settings.profile=p;
+    state.settings.calorieNeed=estimateCalorieNeed(p.sex,p.age,p.height,v,p.activity,p.deficit);
+    state.settings.waterNeed=estimateWaterNeed(v,p.age);
+  }
+  saveState();closeSheet('weightSheet');render();toast('تم حفظ الوزن وتحديث الاحتياج');
 }
-function saveTargets(){
-  state.settings.calorieTarget=clamp(Number(document.getElementById('targetCalories').value)||0,0,6000);
-  state.settings.waterTarget=clamp(Number(document.getElementById('targetWater').value)||0,0,10000);
-  saveState();render();toast('تم حفظ الأهداف');
+function estimateCalorieNeed(sex,age,height,weight,activity,deficit){
+  sex=sex==='female'?'female':'male';age=Number(age);height=Number(height);weight=Number(weight);activity=Number(activity)||1.2;deficit=Number(deficit)||0;
+  if(!age||!height||!weight)return 0;
+  let bmr;
+  if(age>=18){
+    bmr=10*weight+6.25*height-5*age+(sex==='male'?5:-161);
+  }else{
+    if(age<10)bmr=(sex==='male'?22.706*weight+504.3:20.315*weight+485.9);
+    else bmr=(sex==='male'?17.686*weight+658.2:13.384*weight+692.6);
+    deficit=0;
+  }
+  return Math.max(0,Math.round((bmr*activity*(1-clamp(deficit,0,25)/100))/10)*10);
+}
+function estimateWaterNeed(weight,age){
+  weight=Number(weight)||0;age=Number(age)||0;if(!weight)return 0;
+  const factor=age>0&&age<18?35:30;
+  return Math.round((weight*factor)/50)*50;
+}
+function syncProfileUI(){
+  const p=state.settings.profile||{};
+  const latest=getLatestWeight(todayKey());
+  const set=(id,val)=>{const e=document.getElementById(id);if(e)e.value=val??''};
+  set('profileSex',p.sex||'male');set('profileAge',p.age||'');set('profileHeight',p.height||'');set('profileActivity',String(p.activity||'1.375'));set('profileDeficit',String(p.deficit||0));set('profileWeight',latest||p.weight||'');
+  const sc=document.getElementById('settingsCalNeed'),sw=document.getElementById('settingsWaterNeed');
+  if(sc)sc.textContent=state.settings.calorieNeed?ar(state.settings.calorieNeed):'—';
+  if(sw)sw.textContent=state.settings.waterNeed?ar(state.settings.waterNeed):'—';
+}
+function calculateAndSaveNeeds(){
+  const sex=document.getElementById('profileSex').value;
+  const age=Number(document.getElementById('profileAge').value);
+  const height=Number(document.getElementById('profileHeight').value);
+  const weight=Number(document.getElementById('profileWeight').value);
+  const activity=Number(document.getElementById('profileActivity').value);
+  let deficit=Number(document.getElementById('profileDeficit').value)||0;
+  if(!age||age<3||age>100||!height||height<100||height>230||!weight||weight<20||weight>350){alert('أدخل العمر والطول والوزن بشكل صحيح');return}
+  if(age<18)deficit=0;
+  state.settings.profile={sex,age,height,weight,activity:String(activity),deficit};
+  state.settings.calorieNeed=estimateCalorieNeed(sex,age,height,weight,activity,deficit);
+  state.settings.waterNeed=estimateWaterNeed(weight,age);
+  dayData(todayKey()).weight=Math.round(weight*10)/10;
+  saveState();render();
+  toast('تم حساب وحفظ الاحتياج');
 }
 
 function showView(id,btn){
@@ -352,9 +438,10 @@ function setupLegacy(){
 function importLegacy(){
   try{
     const old=JSON.parse(localStorage.getItem(LEGACY_KEY)),i=Number(document.getElementById('legacyPerson').value),p=old.people[i];if(!p)return;
-    if(Number(p.profile&&p.profile.calorieNeed)>0)state.settings.calorieTarget=Number(p.profile.calorieNeed);
-    if(Number(p.profile&&p.profile.waterNeed)>0)state.settings.waterTarget=Number(p.profile.waterNeed);
+    if(Number(p.profile&&p.profile.calorieNeed)>0)state.settings.calorieNeed=Number(p.profile.calorieNeed);
+    if(Number(p.profile&&p.profile.waterNeed)>0)state.settings.waterNeed=Number(p.profile.waterNeed);
     if(Number(p.weight)>0)dayData(todayKey()).weight=Number(p.weight);
+    if(p.profile)state.settings.profile={sex:p.profile.sex||'female',age:p.profile.age||'',height:p.profile.height||'',weight:Number(p.weight)||'',activity:String(p.profile.activity||'1.375'),deficit:Number(p.profile.deficitPct)||0};
     saveState();render();toast('تم نقل بيانات الشخص المختار');
   }catch(e){alert('تعذر قراءة بيانات النسخة السابقة')}
 }
