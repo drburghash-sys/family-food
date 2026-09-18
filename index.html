@@ -148,18 +148,18 @@ button{cursor:pointer}
         <option value="1.55">متوسط</option>
         <option value="1.725">عالٍ</option>
       </select></div>
-      <div class="field"><label>خفض السعرات عن الاحتياج</label><select id="profileDeficit">
-        <option value="0">بدون خفض — محافظة</option>
-        <option value="10">خفض ١٠٪</option>
-        <option value="15">خفض ١٥٪</option>
-        <option value="20">خفض ٢٠٪</option>
+      <div class="field"><label>هدف السعرات</label><select id="profileDeficit">
+        <option value="0">محافظة على الوزن</option>
+        <option value="10">تخفيض الوزن — خفض ١٠٪</option>
+        <option value="15">تخفيض الوزن — خفض ١٥٪</option>
+        <option value="20">تخفيض الوزن — خفض ٢٠٪</option>
       </select></div>
       <button class="btn primary" style="width:100%" onclick="calculateAndSaveNeeds()">احسب واحفظ الاحتياج</button>
       <div class="grid3" style="grid-template-columns:1fr 1fr;margin-bottom:0">
         <div class="stat"><span>احتياج السعرات</span><b id="settingsCalNeed">—</b><small>سعرة/يوم</small></div>
         <div class="stat"><span>احتياج الماء</span><b id="settingsWaterNeed">—</b><small>مل/يوم</small></div>
       </div>
-      <p class="hint">للبالغين يستخدم تقدير Mifflin–St Jeor مع مستوى النشاط. لمن هم دون 18 سنة يعرض تقديرًا تقريبيًا للمحافظة دون تطبيق خفض السعرات. الماء يُقدّر من الوزن ويُحفظ كاحتياج يومي.</p>
+      <p class="hint">للبالغين يستخدم تقدير Mifflin–St Jeor مع مستوى النشاط. لمن هم دون 18 سنة أصبح الهدف في التطبيق تخفيض الوزن بدل المحافظة؛ إذا لم تُحدد نسبة خفض فسيستخدم خفضًا افتراضيًا ١٠٪، وبحد أقصى ١٠٪ في هذه الفئة. الماء يُقدّر من الوزن ويُحفظ كاحتياج يومي.</p>
     </div>
 
     <div class="card">
@@ -348,7 +348,7 @@ function estimateCalorieNeed(sex,age,height,weight,activity,deficit){
   }else{
     if(age<10)bmr=(sex==='male'?22.706*weight+504.3:20.315*weight+485.9);
     else bmr=(sex==='male'?17.686*weight+658.2:13.384*weight+692.6);
-    deficit=0;
+    deficit=deficit>0?Math.min(deficit,10):10;
   }
   return Math.max(0,Math.round((bmr*activity*(1-clamp(deficit,0,25)/100))/10)*10);
 }
@@ -374,7 +374,7 @@ function calculateAndSaveNeeds(){
   const activity=Number(document.getElementById('profileActivity').value);
   let deficit=Number(document.getElementById('profileDeficit').value)||0;
   if(!age||age<3||age>100||!height||height<100||height>230||!weight||weight<20||weight>350){alert('أدخل العمر والطول والوزن بشكل صحيح');return}
-  if(age<18)deficit=0;
+  if(age<18)deficit=deficit>0?Math.min(deficit,10):10;
   state.settings.profile={sex,age,height,weight,activity:String(activity),deficit};
   state.settings.calorieNeed=estimateCalorieNeed(sex,age,height,weight,activity,deficit);
   state.settings.waterNeed=estimateWaterNeed(weight,age);
@@ -453,6 +453,25 @@ async function installApp(){
 }
 if('serviceWorker' in navigator)window.addEventListener('load',()=>navigator.serviceWorker.register('./sw.js').catch(()=>{}));
 
+function migrateMinorWeightLossGoal(){
+  const p=state.settings?.profile||{};
+  const age=Number(p.age)||0;
+  if(age>0&&age<18){
+    const current=Number(p.deficit)||0;
+    const target=current>0?Math.min(current,10):10;
+    if(target!==current){
+      p.deficit=target;
+      state.settings.profile=p;
+      const w=getLatestWeight(todayKey())||Number(p.weight)||0;
+      if(w&&Number(p.height)>0){
+        state.settings.calorieNeed=estimateCalorieNeed(p.sex,age,p.height,w,p.activity,target);
+        state.settings.waterNeed=estimateWaterNeed(w,age);
+      }
+      saveState();
+    }
+  }
+}
+migrateMinorWeightLossGoal();
 setupLegacy();
 render();
 </script>
